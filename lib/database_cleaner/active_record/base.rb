@@ -77,9 +77,13 @@ module DatabaseCleaner
 
       def lookup_from_connection_pool
         if ::ActiveRecord::Base.respond_to?(:descendants)
-          database_name = connection_hash["database"] || connection_hash[:database]
-          models        = ::ActiveRecord::Base.descendants
-          models.detect { |m| m.connection_pool.spec.config[:database] == database_name }
+          database_name      = connection_hash["database"] || connection_hash[:database]
+          schema_search_path = connection_hash["schema_search_path"] || connection_hash[:schema_search_path]
+          models             = ::ActiveRecord::Base.descendants
+          models.detect do |m|
+            m.connection_pool.spec.config[:database] == database_name &&
+              m.connection_pool.spec.config[:schema_search_path] == schema_search_path
+          end
         end
       end
 
